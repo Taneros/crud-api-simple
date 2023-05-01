@@ -4,6 +4,12 @@ import { getUser, getUsers } from './controller'
 
 import { validate } from 'uuid';
 
+
+interface ErrorMessage {
+  message: string,
+  code: number
+}
+
 //TODO 
 /**
   * make separate env to store PORT
@@ -11,7 +17,8 @@ import { validate } from 'uuid';
 const PORT = process.env.PORT || 5555
 
 const server = http.createServer(async (req, res) => {
-  const matchPathUserId = req.url?.match(/\/api\/users\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/)
+  // const matchPathWithUserId = req.url?.match(/\/api\/users\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/)
+  const matchPathWithUserId = req.url?.match(/^\/api\/users\/(.*)$/)
 
   //GET api/users       get all persons
   if (req.url === '/api/users' && req.method === 'GET') {
@@ -21,50 +28,32 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(200, { "Content-Type": "application/json" })
     
     res.end(JSON.stringify(users))
-
   }
-
   
-
   //GET api/users/{userId}        unique user
-  else if (matchPathUserId && req.method === 'GET') {
+  else if (matchPathWithUserId && req.method === 'GET') {
 
-    // console.log(`index.ts - line: 28 ->> req.url?.match(/\/api\/users\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/`, req.url?.match(/\/api\/users\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/))
-    // console.log(`index.ts - line: 28 ->> URL`, req.url.split('/'))
-
-    // console.log(`index.ts - line: 28 ->> req.url?.match(/\/api\/users\/*/`, req.url?.match(/\/users\/*/))
-
-    // const uuidRegex = new RegExp(/\/api\/users\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/i)
-
-    // const userIdFromUrl = req.url.match(uuidRegex)
-
-    // console.log(`index.ts - line: 30 ->> userIdFromUrl`, userIdFromUrl)
-
-    const userIdFromReq = req.url?.split('/')[3]
-
+    const userId = matchPathWithUserId[1]
+    
     try {
-      
-      // const userId = req.url.match(/\/(\d+)+[\/]?/)
-      
-      console.log(`index.ts - line: 29 ->> userId`, userIdFromReq)
 
+      if(!validate(userId)) throw {message: "Invalid uuid!", code: 400};
       
+      if (userId) {
 
-      if (userIdFromReq) {
-
-        const user = await getUser(userIdFromReq) 
+        const user = await getUser(userId) 
         
-        console.log(`index.ts - line: 36 ->> get user`, user)
-
         res.writeHead(200, { "Content-Type": "application/json" })
         res.end(JSON.stringify(user))
 
       }
 
-    } catch (error) {
+    } catch (error: unknown) {
+
+      const typedError = error as ErrorMessage
       
-      res.writeHead(404, { "Content-Type": "application/json" })
-      res.end(JSON.stringify({message: error}))
+      res.writeHead(typedError.code, { "Content-Type": "application/json" })
+      res.end(JSON.stringify({message: typedError.message}))
     }
     
   }
@@ -74,7 +63,6 @@ const server = http.createServer(async (req, res) => {
     res.end(JSON.stringify({message: "Route not found!"}))
   }
 
-  
 })
 
 server.listen(PORT, () => {

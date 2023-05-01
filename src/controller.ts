@@ -11,7 +11,7 @@ const getUser = async (userId: string) => {
     console.log(`controller.ts - line: 10 ->> user`, user)
     
     if (user) resolve(user)
-    reject('Not found!')
+    reject({message: 'Not found!', code: 404})
 
 })}
 
