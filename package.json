@@ -4,7 +4,7 @@
   "description": "crud api week 4 rs-school",
   "main": "./src/index.ts",
   "scripts": {
-    "start": "nodemon ./src/index.ts",
+    "start:dev": "nodemon ./src/index.ts",
     "buil": "tsc",
     "test": "jest"
   },
