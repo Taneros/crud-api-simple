@@ -3,7 +3,7 @@ import usersData from './data';
 
 const getUsers = async () => new Promise((resolve, _) => resolve(usersData))
 
-const getUser = async (userId: number) => {
+const getUser = async (userId: string) => {
   return new Promise((resolve, reject) => {
   
     const user = usersData.find((user) => user.id === userId)
