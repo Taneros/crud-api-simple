@@ -1,9 +1,10 @@
-import http, {IncomingMessage, ServerResponse} from 'http'
 
+import dotenv from 'dotenv'
+import http, { IncomingMessage, ServerResponse } from 'http'
 import { getUser, getUsers } from './controller'
-
 import { validate } from 'uuid';
 
+dotenv.config()
 
 interface ErrorMessage {
   message: string,
@@ -14,7 +15,7 @@ interface ErrorMessage {
 /**
   * make separate env to store PORT
   **/
-const PORT = process.env.PORT || 5555
+const PORT = process.env.PORT || 7777
 
 const server = http.createServer(async (req, res) => {
   // const matchPathWithUserId = req.url?.match(/\/api\/users\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/)
