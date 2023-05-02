@@ -1,8 +1,9 @@
 
 import dotenv from 'dotenv'
 import http, { IncomingMessage, ServerResponse } from 'http'
-import { getUser, getUsers } from './controller'
+import { createUser, getUser, getUsers } from './controller'
 import { validate } from 'uuid';
+import { Users } from 'data';
 
 dotenv.config()
 
@@ -18,7 +19,6 @@ interface ErrorMessage {
 const PORT = process.env.PORT || 7777
 
 const server = http.createServer(async (req, res) => {
-  // const matchPathWithUserId = req.url?.match(/\/api\/users\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/)
   const matchPathWithUserId = req.url?.match(/^\/api\/users\/(.*)$/)
 
   //GET api/users       get all persons
@@ -56,6 +56,47 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(typedError.code, { "Content-Type": "application/json" })
       res.end(JSON.stringify({message: typedError.message}))
     }
+    
+  }
+    
+  else if (req.url === '/api/users' && req.method === 'POST') {
+    console.log(`index.ts - line: 62 ->> `,)
+    
+    let body = ''
+    let user: Pick<Users, 'age' | 'hobbies' | 'username'> | null = null   
+
+    req.on('data', (chunk) => {
+      body += chunk.toString()
+    })
+
+    req.on('end', async () => {
+      console.log(`index.ts - line: 71 ->> BODY`, JSON.parse(body))
+      user = JSON.parse(body)
+
+      try {
+
+        console.log(`index.ts - line: 79 ->> TRY CATCH`, )
+  
+        // check data and throw error if body is not of the required format
+        if (!user) throw { message: "Invalid JSON in POST body!", code: 400 };
+  
+        const newUser = await createUser(user)
+  
+        res.writeHead(200, { "Content-Type": "application/json" })
+        res.end(JSON.stringify(newUser))
+        
+      } catch (error) {
+  
+        const typedError = error as ErrorMessage
+  
+        res.writeHead(typedError.code, { "Content-Type": "application/json" })
+        res.end(JSON.stringify({message: typedError.message}))
+        
+      }
+
+    })
+    
+
     
   }
 
