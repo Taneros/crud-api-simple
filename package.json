@@ -6,8 +6,11 @@
   "scripts": {
     "start:dev": "nodemon ./src/index.ts",
     "buil": "tsc",
-    "test": "jest"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
+  "jest": {
+    "collectCoverage":true
+    },
   "author": "taneros",
   "license": "ISC",
   "dependencies": {
