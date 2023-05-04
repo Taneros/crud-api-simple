@@ -1,4 +1,5 @@
 import {jest} from '@jest/globals'
+import { myServer } from './server'
 // import server from './index'
 
 import supertest, { agent } from 'supertest'
@@ -38,23 +39,23 @@ const requestSuper = supertest(url)
 // });
 
 
-test('send request', async () => {
-    console.log(`index.test.ts - line: 42 ->> url`, url)
-  return requestSuper.get('api/users').expect(200).expect((response) => {
-    console.log(`index.test.ts - line: 31 ->> response`, response)
-  })
-
-})
-
-
-// import { myServer } from 'index'
-
-// const httpServer = myServer()
-
-// const request = agent(httpServer)
-
-// test('sdsf', async () => {
-
-//   const res = await request.get()
+// test('send request', async () => {
+//     console.log(`index.test.ts - line: 42 ->> url`, url)
+//   return requestSuper.get('api/users').expect(200).expect((response) => {
+//     console.log(`index.test.ts - line: 31 ->> response`, response)
+//   })
 
 // })
+
+
+
+
+const httpServer = myServer(6666)
+
+const request = agent(httpServer)
+
+test('sdsf', async () => {
+
+  const res = await request.get('api/users')
+
+})
