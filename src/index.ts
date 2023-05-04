@@ -91,13 +91,8 @@ const server = http.createServer(async (req, res) => {
   
         res.writeHead(typedError.code, { "Content-Type": "application/json" })
         res.end(JSON.stringify({message: typedError.message}))
-        
       }
-
     })
-    
-
-    
   }
 
   else {
@@ -110,3 +105,8 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, () => {
   console.log(`Server started on port: ${PORT}`)
 })
+
+
+const myServer = () => server
+
+export {myServer}
