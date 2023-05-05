@@ -1,61 +1,57 @@
-import {jest} from '@jest/globals'
 import { myServer } from './server'
-// import server from './index'
 
-import supertest, { agent } from 'supertest'
-
-const url = 'http://localhost:5555'
-
-console.log(`index.test.ts - line: 8 ->> url`, url)
-
-const requestSuper = supertest(url)
-
-// jest.unstable_mockModule('node:child_process', () => ({
-//   execSync: jest.fn(),
-// }));
-
-// describe('util', function () {
-//   // it('loads JSON  files', async function () {
-//   //   // import the module being tested, which uses the mocked resource
-//   //   // const {loadJson} = await import( './index.ts' );
-    
-//   //   // const data = loadJson( 'foo.json' );
-    
-//   //   // expect(data).toEqual({ items: ['one', 'two', 'three'] });
-
-
-
-//   //   expect(true).toBe(true)
-//   // });
-
-
-//   test('send request', async () => {
-    
-//     return request.get('api/users').expect(200).expect((response) => {
-//       console.log(`index.test.ts - line: 31 ->> response`, response)
-//     })
-
-//   })
-// });
-
-
-// test('send request', async () => {
-//     console.log(`index.test.ts - line: 42 ->> url`, url)
-//   return requestSuper.get('api/users').expect(200).expect((response) => {
-//     console.log(`index.test.ts - line: 31 ->> response`, response)
-//   })
-
-// })
-
-
-
+import { agent } from 'supertest'
 
 const httpServer = myServer(6666)
 
 const request = agent(httpServer)
 
-test('sdsf', async () => {
+describe('GET requests', () => {
+  test('GET /api/users', async () => {
 
-  const res = await request.get('api/users')
+    const res = await request.get('/api/users')
+  
+    console.log(`index.test.ts - line: 61 ->> res`, res.body)
+  
+    expect(res.body).toEqual([
+      {
+        id: '5560298e-e80b-11ed-a05b-0242ac120003',
+        username: 'renat',
+        age: 40,
+        hobbies: [ 'spanish' ]
+      }
+    ])
+  
+  })
+})
 
+describe('POST requests', () => {
+  
+  test('POST new user', async () => {
+    const res = await request.post('/api/users').send({
+      username: 'ruslan',
+      age: 38,
+      hobbies: [ 'computers' ]
+    })
+
+
+    console.log(`index.test.ts - line: 38 ->> BODY`, Array.isArray(res.body))
+
+    // const parsed = JSON.parse(res.body)
+
+ 
+    // check id is uuid
+    //check everything else is as in post 
+
+    // expect(res.body.slice(-1)).toEqual([
+    //   {
+    //     username: 'ruslan',
+    //     age: 38,
+    //     hobbies: [ 'computers' ]
+    //   }
+    // ])
+
+
+
+  })
 })

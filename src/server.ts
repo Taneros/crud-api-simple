@@ -60,7 +60,7 @@ const server = http.createServer(async (req, res) => {
   }
     
   else if (req.url === '/api/users' && req.method === 'POST') {
-    console.log(`index.ts - line: 62 ->> `,)
+    console.log(`index.ts - line: 62 ->> POST`,)
     
     let body = ''
     let user: Pick<Users, 'age' | 'hobbies' | 'username'> | null = null   
@@ -103,10 +103,10 @@ const server = http.createServer(async (req, res) => {
 })
 
 
-
-const myServer = (PORT: number) => server.listen(PORT, () => {
-  console.log(`Server started on port: ${PORT}`)
-})
-
+const myServer = (PORT: number) => {
+  server.listen(PORT, () => { console.log(`Server started on port: ${PORT}`) })
+  
+  return server
+}
 
 export { myServer }
