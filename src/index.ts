@@ -1,3 +1,5 @@
 import { myServer } from './server';
+const PORT = process.env.PORT
 
-myServer(5555)
+
+myServer(Number(PORT))
