@@ -171,14 +171,15 @@ const server = http.createServer(async (req, res) => {
 }) as unknown as Server
 
 // first user by default
-server.usersData = [
-  {
-    id: '5560298e-e80b-11ed-a05b-0242ac120003',
-    username: 'renat',
-    age: 40,
-    hobbies: ['spanish']
-  }
-]
+// server.usersData = [
+//   {
+//     id: '5560298e-e80b-11ed-a05b-0242ac120003',
+//     username: 'renat',
+//     age: 40,
+//     hobbies: ['spanish']
+//   }
+// ]
+server.usersData = []
 
 const myServer = (PORT: number) => {
   server.listen(PORT, () => { console.log(`Server started on port: ${PORT}`) })

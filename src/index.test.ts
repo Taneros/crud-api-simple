@@ -11,18 +11,24 @@ describe('GET requests', () => {
 
     const res = await request.get('/api/users')
   
-    console.log(`index.test.ts - line: 61 ->> res`, res.body)
-  
-    expect(res.body).toEqual([
-      {
-        id: '5560298e-e80b-11ed-a05b-0242ac120003',
-        username: 'renat',
-        age: 40,
-        hobbies: [ 'spanish' ]
-      }
-    ])
-  
+    expect(res.body).toEqual([])
   })
+
+  test('GET /api/users/{id}', async () => {
+    
+    const newUser = {
+      username: 'pasha',
+      age: 55,
+      hobbies: ['aircraft']
+    }
+    
+    const resPOST = await request.post('/api/users').send(newUser)
+
+    const resGET = await request.get(`/api/users/${resPOST.body.id}`)
+
+    expect(resGET.body).toEqual(resPOST.body)
+  })
+
 })
 
 describe('POST requests', () => {
@@ -34,24 +40,41 @@ describe('POST requests', () => {
       hobbies: [ 'computers' ]
     })
 
+    const newUser = res.body
+    
+    delete newUser.id
 
-    console.log(`index.test.ts - line: 38 ->> BODY`, Array.isArray(res.body))
+    expect(newUser).toEqual(
+      {
+        username: 'ruslan',
+        age: 38,
+        hobbies: [ 'computers' ]
+      }
+    )
 
-    // const parsed = JSON.parse(res.body)
+  })
+})
 
- 
-    // check id is uuid
-    //check everything else is as in post 
+describe('PUT requests', () => {
+  
+  test('POST new user', async () => {
+    const newUser = {
+      username: 'renat',
+      age: 40,
+      hobbies: [ 'JavaScript' ]
+    }
 
-    // expect(res.body.slice(-1)).toEqual([
-    //   {
-    //     username: 'ruslan',
-    //     age: 38,
-    //     hobbies: [ 'computers' ]
-    //   }
-    // ])
+    const updatedUser = {
+      username: 'renat',
+      age: 40,
+      hobbies: [ 'TypeScript' ]
+    }
+    
+    const resPOST = await request.post('/api/users').send(newUser)
 
+    const resPUT = await request.put(`/api/users/${resPOST.body.id}`).send(updatedUser)
 
+    expect(resPUT.body).toEqual({...updatedUser, id: resPOST.body.id})
 
   })
 })
