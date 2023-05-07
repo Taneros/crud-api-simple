@@ -1,12 +1,15 @@
 
 import dotenv from 'dotenv'
 import http, { IncomingMessage, ServerResponse } from 'http'
-import { createUser, getUser, getUsers, updateUser } from './controller'
+import { createUser, getUser, getUsers, updateUser, Users } from './controller'
 import { validate } from 'uuid';
-import { Users } from 'data';
 import { UUID } from 'node:crypto';
 
 dotenv.config()
+
+interface Server extends http.Server<typeof http.IncomingMessage, typeof http.ServerResponse>{
+  usersData: Users[]
+}
 
 interface ErrorMessage {
   message: string,
@@ -140,8 +143,16 @@ const server = http.createServer(async (req, res) => {
     res.end(JSON.stringify({message: "Route not found!"}))
   }
 
-})
+}) as unknown as Server
 
+server.usersData = [
+  {
+    id: '5560298e-e80b-11ed-a05b-0242ac120003',
+    username: 'renat',
+    age: 40,
+    hobbies: ['spanish']
+  }
+]
 
 const myServer = (PORT: number) => {
   server.listen(PORT, () => { console.log(`Server started on port: ${PORT}`) })
@@ -149,4 +160,6 @@ const myServer = (PORT: number) => {
   return server
 }
 
-export { myServer }
+const getServerInstance = () => server
+
+export { myServer, getServerInstance }

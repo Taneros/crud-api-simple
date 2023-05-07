@@ -1,5 +1,6 @@
 // import usersData, { Users } from './data';
 import { randomUUID, UUID } from 'crypto';
+import { getServerInstance } from './server';
 
 export interface Users {
   id: UUID,
@@ -8,21 +9,13 @@ export interface Users {
   hobbies: string[]
 }
 
-const users: Users[] = [
-  {
-    id: '5560298e-e80b-11ed-a05b-0242ac120003',
-    username: 'renat',
-    age: 40,
-    hobbies: ['spanish']
-  }
-]
-
-const getUsers = async (): Promise<unknown> => new Promise((resolve, _) => resolve(users))
+// const getUsers = async (): Promise<unknown> => new Promise((resolve, _) => resolve(users))
+const getUsers = async (): Promise<unknown> => new Promise((resolve, _) => resolve(getServerInstance().usersData))
 
 const getUser = async (userId: string): Promise<unknown> => {
   return new Promise((resolve, reject) => {
   
-    const user = users.find((user) => user.id === userId)
+    const user = getServerInstance().usersData.find((user) => user.id === userId)
         
     if (user) resolve(user)
     reject({message: 'Not found!', code: 404})
@@ -39,7 +32,9 @@ const createUser = async ({age ,hobbies, username}: Pick<Users, 'age' | "hobbies
     username,
   }
 
-  resolve(users.concat([newUser]))
+  getServerInstance().usersData = [...getServerInstance().usersData, newUser]
+
+  resolve(newUser)
 
 })
 
@@ -47,17 +42,17 @@ const createUser = async ({age ,hobbies, username}: Pick<Users, 'age' | "hobbies
 const updateUser = async ({id, age, hobbies, username }: Users): Promise<unknown> => new Promise((resolve, reject) => {
 
 
-  if (users.find((user) => user.id === id)) {
-    const userIdx = users.findIndex((user) => user.id === id)
+  if (getServerInstance().usersData.find((user) => user.id === id)) {
+    const userIdx = getServerInstance().usersData.findIndex((user) => user.id === id)
 
-    users.splice(userIdx, 1, {
+    getServerInstance().usersData.splice(userIdx, 1, {
       id,
       age,
       hobbies,
       username
     })
 
-    resolve(users[userIdx])
+    resolve(getServerInstance().usersData[userIdx])
   } 
 
   reject({message: 'Not Found!', code: 404})
