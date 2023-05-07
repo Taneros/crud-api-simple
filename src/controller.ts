@@ -9,7 +9,6 @@ export interface Users {
   hobbies: string[]
 }
 
-// const getUsers = async (): Promise<unknown> => new Promise((resolve, _) => resolve(users))
 const getUsers = async (): Promise<unknown> => new Promise((resolve, _) => resolve(getServerInstance().usersData))
 
 const getUser = async (userId: string): Promise<unknown> => {
@@ -41,7 +40,6 @@ const createUser = async ({age ,hobbies, username}: Pick<Users, 'age' | "hobbies
 
 const updateUser = async ({id, age, hobbies, username }: Users): Promise<unknown> => new Promise((resolve, reject) => {
 
-
   if (getServerInstance().usersData.find((user) => user.id === id)) {
     const userIdx = getServerInstance().usersData.findIndex((user) => user.id === id)
 
@@ -59,4 +57,21 @@ const updateUser = async ({id, age, hobbies, username }: Users): Promise<unknown
 
 })
 
-export {getUsers, getUser, createUser, updateUser}
+
+const deleteUser = async ({ id }: Pick<Users, 'id'>): Promise<unknown> => new Promise((resolve, reject) => {
+  
+  if (getServerInstance().usersData.find((user) => user.id === id)) {
+
+    const userIdx = getServerInstance().usersData.findIndex((user) => user.id === id)
+
+    getServerInstance().usersData.splice(userIdx, 1)
+
+    resolve({})
+  } 
+
+  reject({message: 'Not Found!', code: 404})
+
+})
+
+
+export { getUsers, getUser, createUser, updateUser, deleteUser}
