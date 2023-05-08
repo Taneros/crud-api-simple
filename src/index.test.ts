@@ -34,23 +34,21 @@ describe('GET requests', () => {
 describe('POST request', () => {
   
   test('POST /api/users create a new user', async () => {
-    const res = await request.post('/api/users').send({
+    const newUser = {
       username: 'ruslan',
       age: 38,
       hobbies: [ 'computers' ]
-    })
-
-    const newUser = res.body
+    }
     
-    delete newUser.id
+    const resPOST = await request.post('/api/users').send(newUser)
 
-    expect(newUser).toEqual(
-      {
-        username: 'ruslan',
-        age: 38,
-        hobbies: [ 'computers' ]
-      }
-    )
+    expect(resPOST.statusCode).toBe(201)
+
+    const respNewUser = resPOST.body
+    
+    delete respNewUser.id
+
+    expect(respNewUser).toEqual(newUser)
 
   })
 })
@@ -90,8 +88,12 @@ describe('DELETE request', () => {
     }
     
     const resPOST = await request.post('/api/users').send(newUser)
+    
+    expect(resPOST.statusCode).toBe(201)
+    
+    const resDELETE = await request.delete(`/api/users/${resPOST.body.id}`)
 
-    await request.delete(`/api/users/${resPOST.body.id}`)
+    expect(resDELETE.statusCode).toBe(204)
 
     const resGET = await request.get(`/api/users/${resPOST.body.id}`)
 
