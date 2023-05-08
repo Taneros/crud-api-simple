@@ -33,7 +33,7 @@ describe('GET requests', () => {
 
 describe('POST requests', () => {
   
-  test('POST new user', async () => {
+  test('POST /api/users create a new user', async () => {
     const res = await request.post('/api/users').send({
       username: 'ruslan',
       age: 38,
@@ -57,7 +57,7 @@ describe('POST requests', () => {
 
 describe('PUT requests', () => {
   
-  test('POST new user', async () => {
+  test('PUT /api/users/{id} change existing user record', async () => {
     const newUser = {
       username: 'renat',
       age: 40,
