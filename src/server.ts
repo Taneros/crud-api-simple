@@ -182,7 +182,7 @@ const server = http.createServer(async (req, res) => {
 server.usersData = []
 
 const myServer = (PORT: number) => {
-  server.listen(PORT, () => { console.log(`Server started on port: ${PORT}`) })
+  server.listen(PORT, () => { console.log(`\nServer started on port: ${PORT}\n`) })
 
   return server
 }
