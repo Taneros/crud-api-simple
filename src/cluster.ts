@@ -6,7 +6,7 @@ import http from 'http'
 
 const PORT = 7878
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
+// const __dirname = dirname(fileURLToPath(import.meta.url))
 
 // const mainServer = http.createServer(async (req, res) => {
   
