@@ -1,53 +1,34 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-
+import dotenv from "dotenv"
+import { env } from 'process'
 import cluster from 'cluster'
-import os from 'os'
-import { dirname } from 'path'
-import { fileURLToPath } from 'url'
 import http from 'http'
-import { availableParallelism } from 'node:os';
+import process from 'node:process'
+import os from 'os'
+import { ServerMod } from 'server'
+import getReqData from './utils'
 
-import process from 'node:process';
 
+async function getCllusterServerInstanceAsync() {
+  const {getServerInstance } = await import('./clusterServer');
+  
+  return getServerInstance
+}
 
-const PORT = Number(process.env.CLUSTERPORT_START) || 7878
+dotenv.config()
+
+console.log(`CLUSTER_PORT_START: `,  process.env.CLUSTER_PORT_START )
+
+const PORT = Number(process.env.CLUSTER_PORT_START) || 7878
 
 let CurrentPort = Number(PORT) + 1
 
-// const __dirname = dirname(fileURLToPath(import.meta.url))
-
-// const mainServer = http.createServer(async (req, res) => {
-
-//   res.writeHead(200, { "Content-Type": "application/json" })
-
-//   res.end(JSON.stringify({message: 'get request'}))
-// })
-
-// mainServer.listen(PORT, () => { console.log(`\nServer started on port: ${PORT}\n`) })
-
-
 const cpus = os.cpus()
 
-// console.log(`CPUs number: ${cpus.length}`)
-// cluster.setupPrimary({
-//   exec: __dirname + '/clusterServer.ts',
-//   execArgv: [``],
-// })
+let mainServer: ServerMod | null = null
 
-// cpus.forEach(element => {
-//   cluster.fork()
-// });
-
-// cluster.on('exit', (worker, code, signal) => {
-//   console.log(`worker ${worker.process.pid} was killed`)
-//   console.log(`Starting another worker`)
-//   cluster.fork()
-// })
-
-
-//
 if (cluster.isPrimary) {
-  console.log(`cluster.ts - line: 45 ->> PRIMARY`,)
+  console.log(`cluster.ts - line: 31 ->> PRIMARY`,)
 
   cpus.forEach((cpu, idx) => {
 
@@ -59,21 +40,7 @@ if (cluster.isPrimary) {
 
   });
 
-  const mainServer = http.createServer((req, res) => {
-
-    // console.log(`cluster.ts - line: 64 ->> req`, req)
-
-    // res.writeHead(200, { "Content-Type": "application/json" })
-
-    // res.end(JSON.stringify({ message: 'main server' }))
-
-    //@ts-ignore
-    // if (typeof process.send === 'function') { 
-
-    //   console.log(`cluster.ts - line: 73 ->> MSG`, )
-
-    //   process.send({ cmd: 'notifyRequest' });
-    // }
+  mainServer = http.createServer(async (req, res) => {
     
     const options = {
       hostname: 'localhost',
@@ -82,87 +49,41 @@ if (cluster.isPrimary) {
       method: req.method,
       headers: req.headers
     };
+
+    const body = await getReqData(req)
     
+    console.log(`cluster.ts - line: 51 ->> body`, body)
 
-    http.request(options, (respCluster) => {
+    http.request(options, async(respCluster) => { 
+
+      console.log(`cluster.ts - line: 59 ->>  respCluster.headers`, respCluster.headers)
+
+      const bodyRespCluster = await getReqData(respCluster)
+    
+      console.log(`cluster.ts - line: 63 ->> body`, bodyRespCluster)
       
-      console.log(`cluster.ts - line: 87 ->> respCluster`, respCluster.headers)
-
-      CurrentPort= CurrentPort === PORT + cpus.length ? PORT + 1 : CurrentPort + 1
+      CurrentPort = CurrentPort === PORT + cpus.length ? PORT + 1 : CurrentPort + 1
       
       respCluster.pipe(res).on('finish', () => {
-
-
+        console.log(`cluster.ts - line: 68 ->> PIPE`,)
+        
         res.end()
       })
-    }).end()
+    }).end(body)
 
-  })
-
-
-  mainServer.listen(PORT, () => { console.log(`\nServer started on port: ${PORT} `) })
-
-  cluster.on('fork', (worker) => {
-    console.log(`cluster.ts - line: 100 ->> worker fork`)
-
-    // PORT += worker.id
-
-    // const clusterServer = http.createServer((req, res) => {
-
-    //   console.log(`cluster.ts - line: 104 ->> `)
-
-    //   res.writeHead(200, { "Content-Type": "application/json", "Worker": `${worker.id}` })
-
-    //   // res.end(JSON.stringify({ message: 'worker id' + worker.id }))
-    //   res.end()
-    // })
-
-    // clusterServer.listen(Number(PORT) + worker.id, () => { console.log(`\nServer started on port: ${Number(PORT) + worker.id}\n`) })
-
-  })
-
-  // cluster.on("exit", (worker, code, signal) => {
-  //   console.log(`worker ${worker.process.pid} has been killed`);
-  //   console.log("Starting another worker");
-  //   cluster.fork();
-  // });
-
-  // cluster.on('online', (worker) => {
-  //   worker.on('message', (msg) => {
-
-  //     console.log(msg.cmd, worker.id)
-  //   });
-  // })
+  }) as unknown as ServerMod
 
 
-  // for (const id in cluster.workers) {
-  //   //@ts-ignore
-  //   cluster.workers[id].on('message', (msg, handdle) => {
+  mainServer.listen(PORT, () => { console.log(`\nMain server started on port: ${PORT} `) })
 
-  //     console.log(msg.cmd, id)
-  //     console.log(`cluster.ts - line: 85 ->> handdle`, handdle)
-  //   });
-
-  //   }
-    
-
-  // console.log(`cluster.ts - line: 91 ->> luster.workers`, cluster.workers)
 
 } else {
 
   console.log(`Worker ${process.pid} started`);
 
-
-  const clusterServer = http.createServer((req, res) => {
-
-    console.log(`cluster.ts - line: 104 ->> `)
-
-    res.writeHead(200, { "Content-Type": "application/json", "Worker": `${process.pid}` })
-
-    // res.end(JSON.stringify({ message: 'worker id' + worker.id }))
-    res.end()
+  getCllusterServerInstanceAsync().then(res => {
+    
+    res().listen(process.env.WORKER_NAME, () => { console.log(`\nCluster server started on port: ${process.env.WORKER_NAME}`) })
+    
   })
-
-  clusterServer.listen(process.env.WORKER_NAME, () => { console.log(`\nServer started on port: ${process.env.WORKER_NAME}`) })
-
 }

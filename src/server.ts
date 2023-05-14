@@ -5,7 +5,7 @@ import { validate } from 'uuid';
 import { UUID } from 'node:crypto';
 
 
-interface Server extends http.Server<typeof http.IncomingMessage, typeof http.ServerResponse> {
+export interface ServerMod extends http.Server<typeof http.IncomingMessage, typeof http.ServerResponse> {
   usersData: Users[]
 }
 
@@ -166,7 +166,7 @@ const server = http.createServer(async (req, res) => {
     res.end(JSON.stringify({ message: "Route not found!" }))
   }
 
-}) as unknown as Server
+}) as unknown as ServerMod
 
 // first user by default
 // server.usersData = [
