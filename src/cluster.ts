@@ -4,11 +4,11 @@ import cluster from 'cluster'
 import os from 'os'
 import { dirname } from 'path'
 import { fileURLToPath } from 'url'
-import http from 'http'
+import http, { IncomingMessage } from 'http'
 import { availableParallelism } from 'node:os';
 
-import process from 'node:process';
 
+import process from 'node:process';
 
 const PORT = Number(process.env.CLUSTERPORT_START) || 7878
 
@@ -25,6 +25,28 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 
 // mainServer.listen(PORT, () => { console.log(`\nServer started on port: ${PORT}\n`) })
 
+
+import { myServer } from './server';
+
+
+
+const getReqData = (req: IncomingMessage) => {
+  return new Promise((resolve, reject) => {
+    try {
+      let body = ""
+      req.on('data', (chunk: Buffer) => {
+        body += chunk.toString()
+      })
+
+      req.on('end', () => {
+        resolve(body)
+      })
+
+    } catch (error) {
+      reject(error)
+    }
+  })
+}
 
 const cpus = os.cpus()
 
@@ -86,12 +108,13 @@ if (cluster.isPrimary) {
 
     http.request(options, (respCluster) => {
       
-      console.log(`cluster.ts - line: 87 ->> respCluster`, respCluster.headers)
+      console.log(`cluster.ts - line: 89 ->> respCluster`, respCluster.headers)
 
-      CurrentPort= CurrentPort === PORT + cpus.length ? PORT + 1 : CurrentPort + 1
+      CurrentPort = CurrentPort === PORT + cpus.length ? PORT + 1 : CurrentPort + 1
+      
+      getReqData(respCluster).then(data => console.log(`cluster.ts - line: 93 ->> data`, data))
       
       respCluster.pipe(res).on('finish', () => {
-
 
         res.end()
       })
@@ -103,7 +126,7 @@ if (cluster.isPrimary) {
   mainServer.listen(PORT, () => { console.log(`\nServer started on port: ${PORT} `) })
 
   cluster.on('fork', (worker) => {
-    console.log(`cluster.ts - line: 100 ->> worker fork`)
+    console.log(`cluster.ts - line: 107 ->> worker fork`)
 
     // PORT += worker.id
 
@@ -153,15 +176,19 @@ if (cluster.isPrimary) {
   console.log(`Worker ${process.pid} started`);
 
 
-  const clusterServer = http.createServer((req, res) => {
+  const clusterServer = myServer(Number(PORT))
 
-    console.log(`cluster.ts - line: 104 ->> `)
+  // const clusterServer = http.createServer((req, res) => {
 
-    res.writeHead(200, { "Content-Type": "application/json", "Worker": `${process.pid}` })
+  //   console.log(`cluster.ts - line: 159 ->> `)
 
-    // res.end(JSON.stringify({ message: 'worker id' + worker.id }))
-    res.end()
-  })
+  //   res.writeHead(200, { "Content-Type": "application/json", "Worker": `${process.pid}` })
+
+  //   // res.end(JSON.stringify({ message: 'worker id' + worker.id }))
+  //   res.end(JSON.stringify({user: 'yoyoy'}))
+  // })
+
+  
 
   clusterServer.listen(process.env.WORKER_NAME, () => { console.log(`\nServer started on port: ${process.env.WORKER_NAME}`) })
 
