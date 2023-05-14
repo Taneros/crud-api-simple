@@ -1,6 +1,6 @@
 import { randomUUID, UUID } from 'crypto';
-import { getServerInstance } from './clusterServer';
-import { env } from 'process'
+// import { getServerInstance } from './server';
+import { getServerInstance } from './cluster';
 
 export interface Users {
   id: UUID,
