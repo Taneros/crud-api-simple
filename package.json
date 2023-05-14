@@ -2,7 +2,6 @@
   "name": "crud-api",
   "version": "0.0.1",
   "description": "crud api week 4 rs-school",
-  "type": "module",
   "scripts": {
     "start:dev": "nodemon --exec ts-node --esm ./src/index.ts",
     "start:multi": "nodemon --exec ts-node --esm ./src/cluster.ts",

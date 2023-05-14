@@ -1,11 +1,9 @@
 
-import dotenv from 'dotenv'
 import http, { IncomingMessage, OutgoingMessage, ServerResponse } from 'http'
 import { createUser, deleteUser, getUser, getUsers, updateUser, Users } from './controller'
 import { validate } from 'uuid';
 import { UUID } from 'node:crypto';
 
-dotenv.config()
 
 interface Server extends http.Server<typeof http.IncomingMessage, typeof http.ServerResponse> {
   usersData: Users[]
