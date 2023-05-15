@@ -23,6 +23,10 @@ const cpus = os.cpus()
 
 let myWorkers: WorkersMod = null
 
+const DB: Users[] = []
+
+let mainServer: ServerMod = null
+
 if (cluster.isPrimary) {
   cpus.forEach((cpu, idx) => {
 
@@ -38,7 +42,7 @@ if (cluster.isPrimary) {
 
   myWorkers = cluster.workers as unknown as WorkersMod
 
-  const mainServer = http.createServer(async (req, res) => {
+  mainServer = http.createServer(async (req, res) => {
 
     const options = {
       hostname: 'localhost',
@@ -50,33 +54,64 @@ if (cluster.isPrimary) {
 
     const body = await getReqData(req) as Users
 
-    console.log(`cluster.ts - line: 51 ->> body`, body)
-
     http.request(options, async (respCluster) => {
 
       console.log(`cluster.ts - line: 59 ->>  respCluster.headers`, respCluster.headers)
 
       CurrentPort = CurrentPort === PORT + cpus.length ? PORT + 1 : CurrentPort + 1
 
-      respCluster.pipe(res).on('finish', () => {
-        console.log(`cluster.ts - line: 68 ->> PIPE`,)
+      // console.log(`cluster.ts - line: 62 ->> respClusterBody`, await getReqData(respCluster))
+      
+      const respBody = await getReqData(respCluster) as Users
 
-        // myWorkers.users = [...myWorkers.users, body]
+      console.log(`cluster.ts - line: 67 ->> respBody`, respBody)
 
-        console.log(`cluster.ts - line: 82 ->> myWorkers`, myWorkers.usersData)
+      // respCluster.pipe(res).on('finish', async () => {
+      //   console.log(`cluster.ts - line: 68 ->> PIPE`,)
+
+
+      //   console.log(`cluster.ts - line: 69 ->> await getReqData(respCluster)`, respBody)
+
+      //   // mainServer.usersData = [...JSON.parse()]
+
+      //   // console.log(`cluster.ts - line: 82 ->> myWorkers`, myWorkers.usersData)
         
-        res.end()
-      })
+      //   res.end()
+      // })
+
+      mainServer.usersData = [...mainServer.usersData, respBody]
+
+      process.env.DB = JSON.stringify(mainServer)
+
+      res.end(respBody)
+
     }).end(body)
 
-  })
+  }) as unknown as ServerMod
 
+  mainServer.usersData = []
 
   mainServer.listen(PORT, () => { console.log(`\nMain server started on port: ${PORT} `) })
+
+  cluster.on('listening', (worker, address) => {
+
+    console.log(`cluster.ts - line: 81 ->> worker id`, worker.id)
+
+    console.log(
+      `A worker is now connected to ${address.address}:${address.port}`);
+    
+      // process.env.DB = JSON.stringify(mainServer.usersData ?? [])
+  }); 
+
+  // cluster.on('message', (msg) => {
+  //   console.log(`cluster.ts - line: 98 ->> msg`, msg)
+  // })
 
 } else {
 
   console.log(`Worker ${process.pid} started`);
+
+  process.env.DB = JSON.stringify(mainServer?.usersData ?? [])
 
   myServer(Number(process.env.WORKER_NAME)) 
 }

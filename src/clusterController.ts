@@ -1,6 +1,6 @@
 import { randomUUID, UUID } from 'crypto';
 // import { getServerInstance } from './server';
-import { getServerInstance } from './cluster';
+import { getServerInstance } from './clusterServer';
 
 export interface Users {
   id: UUID,
@@ -9,7 +9,10 @@ export interface Users {
   hobbies: string[]
 }
 
-const getUsers = async (): Promise<unknown> => new Promise((resolve, _) => resolve(getServerInstance().usersData))
+const getUsers = async (): Promise<unknown> => new Promise((resolve, _) => {
+  console.log(`clusterController.ts - line: 13 ->> process.env.DB`, process.env.DB)
+  resolve([])
+})
 
 const getUser = async (userId: string): Promise<unknown> => {
   return new Promise((resolve, reject) => {
@@ -24,7 +27,7 @@ const getUser = async (userId: string): Promise<unknown> => {
 
 const createUser = async ({age ,hobbies, username}: Pick<Users, 'age' | "hobbies" | "username">): Promise<unknown> => new Promise((resolve, reject) => {
 
-  console.log(`clusterController.ts - line: 26 -> getServerInstance().usersData`, getServerInstance().usersData)
+  console.log(`clusterController.ts - line: 13 ->> process.env.DB`, process.env.DB)
 
   const newUser: Users = {
     id: randomUUID(),

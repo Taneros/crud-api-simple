@@ -22,7 +22,7 @@ const server = http.createServer(async (req, res) => {
 
     const users = await getUsers()
 
-    res.writeHead(200, { "Content-Type": "application/json" })
+    res.writeHead(200, { "Content-Type": "application/json", "ProcesPID": `${process.pid}` })
 
     res.end(JSON.stringify(users))
   }

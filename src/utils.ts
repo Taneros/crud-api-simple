@@ -1,3 +1,4 @@
+import { Users } from 'clusterController'
 import { IncomingMessage } from 'http'
 
 const getReqData = (req: IncomingMessage) => {
